@@ -150,7 +150,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-warning" onclick="editBook({{ $book->BookID }})">
+                                        <button class="btn btn-sm btn-warning" onclick="editBook('{{ $book->BookID }}')">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <form action="{{ route('admin.delete.book', $book->BookID) }}" 

@@ -6,18 +6,29 @@ use App\Models\Book;
 use App\Models\OrderBook;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 
 class StudentController extends Controller
 {
     // Hiển thị dashboard student
     public function dashboard()
     {
-        // Kiểm tra đăng nhập
-        if (Session::get('user_type') !== 'student') {
+        // Kiểm tra đăng nhập - DÙNG CÁCH NÀY CHO CHẮC
+        if (!Session::get('student_logged_in') && Session::get('user_type') !== 'student') {
+            Log::warning('Student dashboard access denied', [
+                'user_type' => Session::get('user_type'),
+                'student_logged_in' => Session::get('student_logged_in')
+            ]);
             return redirect()->route('login')->withErrors(['auth' => 'Please login as student.']);
         }
 
         $studentId = Session::get('student_id');
+        $username = Session::get('username');
+        
+        Log::info('Student dashboard accessed', [
+            'student_id' => $studentId,
+            'username' => $username
+        ]);
         
         // Lấy danh sách sách có sẵn
         $books = Book::where('Quantity', '>', 0)->get();
@@ -45,14 +56,14 @@ class StudentController extends Controller
             return response()->json($books);
         }
 
-        return back();
+        return view('student.search', compact('books', 'search'));
     }
 
     // Đặt mượn sách
     public function orderBook(Request $request)
     {
         // Kiểm tra đăng nhập
-        if (Session::get('user_type') !== 'student') {
+        if (!Session::get('student_logged_in')) {
             return redirect()->route('login');
         }
 
@@ -89,6 +100,12 @@ class StudentController extends Controller
             'Status' => 'Pending'
         ]);
 
+        Log::info('Book ordered', [
+            'student_id' => $studentId,
+            'book_id' => $book->BookID,
+            'book_name' => $book->Bookname
+        ]);
+
         return back()->with('success', 'Book ordered successfully! Wait for admin approval.');
     }
 
@@ -113,6 +130,11 @@ class StudentController extends Controller
         }
 
         $order->delete();
+
+        Log::info('Order cancelled', [
+            'order_id' => $request->order_id,
+            'student_id' => $studentId
+        ]);
 
         return back()->with('success', 'Order cancelled successfully.');
     }
