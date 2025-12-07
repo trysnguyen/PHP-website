@@ -61,27 +61,40 @@ class AdminController extends Controller
 
     // Tìm kiếm sách
     public function searchBooks(Request $request)
-    {
-        if (!Session::get('admin_logged_in')) {
-            return redirect()->route('login');
-        }
-
-        $search = $request->input('search', '');
-        
-        $books = Book::where(function($query) use ($search) {
-                $query->where('Bookname', 'like', "%$search%")
-                      ->orWhere('Author', 'like', "%$search%")
-                      ->orWhere('Category', 'like', "%$search%");
-            })
-            ->orderBy('BookID')
-            ->get();
-
-        if ($request->ajax()) {
-            return response()->json($books);
-        }
-
-        return view('admin.search-books', compact('books', 'search'));
+{
+    if (!Session::get('admin_logged_in')) {
+        return redirect()->route('login');
     }
+
+    $search = $request->input('search', '');
+    
+    $books = Book::where(function($query) use ($search) {
+            $query->where('Bookname', 'like', "%$search%")
+                  ->orWhere('Author', 'like', "%$search%")
+                  ->orWhere('Category', 'like', "%$search%");
+        })
+        ->orderBy('BookID')
+        ->get();
+
+    // Lấy tất cả orders cho stats
+    $orders = OrderBook::orderBy('created_at', 'desc')->get();
+    
+    // Tính toán stats
+    $pendingOrders = $orders->where('Status', 'Pending')->count();
+    $totalBooks = Book::count();
+    $availableBooks = Book::where('Quantity', '>', 0)->count();
+    $acceptedOrders = $orders->where('Status', 'Accept')->count();
+    $refusedOrders = $orders->where('Status', 'Refuse')->count();
+    $returnedOrders = $orders->where('Status', 'Returned')->count();
+    $totalOrders = $orders->count();
+
+    // KHÔNG trả về view riêng, mà trả về dashboard view với dữ liệu tìm kiếm
+    return view('admin.dashboard', compact(
+        'books', 'orders', 'pendingOrders', 'totalBooks', 
+        'availableBooks', 'acceptedOrders', 'refusedOrders', 
+        'returnedOrders', 'totalOrders', 'search'
+    ));
+}
 
     // Thêm sách mới
     public function addBook(Request $request)
@@ -115,62 +128,149 @@ class AdminController extends Controller
 
     // Cập nhật sách
     public function updateBook(Request $request, $id)
-    {
-        if (!Session::get('admin_logged_in')) {
-            return redirect()->route('login');
-        }
+{
+    if (!Session::get('admin_logged_in')) {
+        return redirect()->route('login')->with('error', 'Please login as admin.');
+    }
 
-        $request->validate([
-            'Bookname' => 'required|string|max:200',
-            'Author' => 'required|string|max:100',
-            'Category' => 'required|string|max:50',
-            'Quantity' => 'required|integer|min:0'
-        ]);
+    $request->validate([
+        'Bookname' => 'required|string|max:200',
+        'Author' => 'required|string|max:100',
+        'Category' => 'required|string|max:50',
+        'Quantity' => 'required|integer|min:0'
+    ]);
 
-        $book = Book::find($id);
-        if ($book) {
-            $book->update($request->all());
-            
-            Log::info('Book updated by admin', [
-                'book_id' => $book->BookID,
-                'book_name' => $book->Bookname,
-                'new_quantity' => $book->Quantity
-            ]);
-            
-            return back()->with('success', 'Book updated successfully!');
-        }
-
+    $book = Book::find($id);
+    if (!$book) {
         return back()->withErrors(['error' => 'Book not found.']);
     }
+
+    $oldQuantity = $book->Quantity;
+    $newQuantity = $request->Quantity;
+    
+    // KIỂM TRA NẾU GIẢM SỐ LƯỢNG
+    if ($newQuantity < $oldQuantity) {
+        // Đếm số sách đang được mượn (status = 'Accept')
+        $borrowedCount = OrderBook::where('Bookname', $book->Bookname)
+            ->where('Status', 'Accept')
+            ->count();
+        
+        // Không thể giảm số lượng nhỏ hơn số sách đang mượn
+        if ($newQuantity < $borrowedCount) {
+            return back()->withErrors([
+                'error' => "Cannot reduce quantity to {$newQuantity}. 
+                          There are {$borrowedCount} books currently borrowed."
+            ]);
+        }
+    }
+    
+    // Cập nhật sách
+    $book->update([
+        'Bookname' => $request->Bookname,
+        'Author' => $request->Author,
+        'Category' => $request->Category,
+        'Quantity' => $newQuantity
+    ]);
+
+    Log::info('Book updated by admin', [
+        'book_id' => $book->BookID,
+        'book_name' => $book->Bookname,
+        'old_quantity' => $oldQuantity,
+        'new_quantity' => $newQuantity
+    ]);
+
+    return back()->with('success', "Book '{$book->Bookname}' updated successfully!");
+}
 
     // Xóa sách
     public function deleteBook($id)
-    {
-        if (!Session::get('admin_logged_in')) {
-            return redirect()->route('login');
-        }
-
-        $book = Book::find($id);
-        if ($book) {
-            // Kiểm tra xem sách có trong đơn hàng không
-            $hasOrders = OrderBook::where('Bookname', $book->Bookname)->exists();
-            
-            if ($hasOrders) {
-                return back()->withErrors(['error' => 'Cannot delete. This book has existing orders.']);
-            }
-            
-            $book->delete();
-            
-            Log::info('Book deleted by admin', [
-                'book_id' => $id,
-                'book_name' => $book->Bookname
-            ]);
-            
-            return back()->with('success', 'Book deleted successfully!');
-        }
-
-        return back()->withErrors(['error' => 'Book not found.']);
+{
+    if (!Session::get('admin_logged_in')) {
+        return redirect()->route('login')->with('error', 'Please login as admin.');
     }
+
+    $book = Book::find($id);
+    if (!$book) {
+        return back()->with('error', 'Book not found.');
+    }
+
+    // KIỂM TRA THEO BOOKNAME (vì database không có BookID trong order_books)
+    $ordersForThisBook = OrderBook::where('Bookname', $book->Bookname)->get();
+    
+    // Kiểm tra xem có đơn hàng active không (Pending hoặc Accept)
+    $hasActiveOrders = $ordersForThisBook->contains(function ($order) {
+        return in_array($order->Status, ['Pending', 'Accept']);
+    });
+    
+    if ($hasActiveOrders) {
+        $activeCount = $ordersForThisBook->whereIn('Status', ['Pending', 'Accept'])->count();
+        return back()->with('error', "Cannot delete. This book has {$activeCount} active/pending order(s).");
+    }
+    
+    // Đếm số lượng đơn refused/returned
+    $refusedCount = $ordersForThisBook->where('Status', 'Refuse')->count();
+    $returnedCount = $ordersForThisBook->where('Status', 'Returned')->count();
+    $hasAnyOrders = $ordersForThisBook->count() > 0;
+    
+    $bookName = $book->Bookname;
+    $book->delete();
+    
+    // Thông báo khác nhau tùy theo loại đơn hàng
+    if ($hasAnyOrders) {
+        $message = "Book '{$bookName}' deleted successfully. ";
+        $message .= "Note: {$ordersForThisBook->count()} refused/returned orders are still in history.";
+    } else {
+        $message = "Book '{$bookName}' deleted successfully!";
+    }
+    
+    return back()->with('success', $message);
+}
+
+    public function deleteMultipleBooks(Request $request)
+{
+    if (!Session::get('admin_logged_in')) {
+        return redirect()->route('login');
+    }
+
+    $request->validate([
+        'book_ids' => 'required|array',
+        'book_ids.*' => 'exists:books,BookID'
+    ]);
+
+    $deletedCount = 0;
+    $failedBooks = [];
+
+    foreach ($request->book_ids as $bookId) {
+        $book = Book::find($bookId);
+        
+        // Kiểm tra đơn hàng
+        $hasOrders = OrderBook::where('BookID', $book->BookID)->exists();
+        
+        if ($hasOrders) {
+            $failedBooks[] = $book->Bookname;
+            continue;
+        }
+        
+        $book->delete();
+        $deletedCount++;
+        
+        Log::info('Book deleted in batch', [
+            'book_id' => $book->BookID,
+            'book_name' => $book->Bookname
+        ]);
+    }
+
+    $response = [];
+    if ($deletedCount > 0) {
+        $response['success'] = "Successfully deleted {$deletedCount} book(s).";
+    }
+    if (!empty($failedBooks)) {
+        $response['warning'] = "Could not delete: " . implode(', ', $failedBooks) . 
+                              " (have existing orders)";
+    }
+
+    return back()->with($response);
+}
 
     // Duyệt đơn hàng (Accept/Refuse) - ĐÃ SỬA CHO ĐÚNG ENUM
     public function updateOrderStatus(Request $request)

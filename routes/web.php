@@ -58,13 +58,16 @@ Route::middleware(['auth.admin'])->group(function () {
     Route::get('/admin/search-books', [AdminController::class, 'searchBooks'])->name('admin.search.books');
     Route::post('/admin/add-book', [AdminController::class, 'addBook'])->name('admin.add.book');
     Route::post('/admin/update-book/{id}', [AdminController::class, 'updateBook'])->name('admin.update.book');
+    Route::match(['PUT', 'POST'], '/admin/update-book/{id}', [AdminController::class, 'updateBook'])->name('admin.update.book');
     Route::delete('/admin/delete-book/{id}', [AdminController::class, 'deleteBook'])->name('admin.delete.book');
     Route::post('/admin/update-order-status', [AdminController::class, 'updateOrderStatus'])->name('admin.update.order.status');
     Route::post('/admin/mark-returned', [AdminController::class, 'markAsReturned'])->name('admin.mark.returned');
     Route::get('/admin/statistics', [AdminController::class, 'statistics'])->name('admin.statistics');
+    Route::post('/admin/delete-books', [AdminController::class, 'deleteMultipleBooks'])->name('admin.delete.books');
+    Route::post('/admin/soft-delete-book/{id}', [AdminController::class, 'softDeleteBook'])->name('admin.soft.delete.book');
+    Route::post('/admin/restore-book/{id}', [AdminController::class, 'restoreBook'])->name('admin.restore.book');
 
 });
-
 // ============================================
 // FALLBACK ROUTE (404)
 // ============================================

@@ -12,32 +12,34 @@ class StudentController extends Controller
 {
     // Hiển thị dashboard student
     public function dashboard()
-    {
-        // Kiểm tra đăng nhập - DÙNG CÁCH NÀY CHO CHẮC
-        if (!Session::get('student_logged_in') && Session::get('user_type') !== 'student') {
-            Log::warning('Student dashboard access denied', [
-                'user_type' => Session::get('user_type'),
-                'student_logged_in' => Session::get('student_logged_in')
-            ]);
-            return redirect()->route('login')->withErrors(['auth' => 'Please login as student.']);
-        }
-
-        $studentId = Session::get('student_id');
-        $username = Session::get('username');
-        
-        Log::info('Student dashboard accessed', [
-            'student_id' => $studentId,
-            'username' => $username
-        ]);
-        
-        // Lấy danh sách sách có sẵn
-        $books = Book::where('Quantity', '>', 0)->get();
-        
-        // Lấy đơn hàng của sinh viên
-        $orders = OrderBook::where('StudentID', $studentId)->get();
-
-        return view('student.dashboard', compact('books', 'orders'));
+{
+    if (!Session::get('student_logged_in')) {
+        return redirect()->route('login');
     }
+
+    // Nhận search parameter từ request
+    $search = request()->input('search', '');
+    
+    // Query sách với điều kiện tìm kiếm
+    $booksQuery = Book::where('Quantity', '>', 0); // Chỉ sách còn hàng
+    
+    if ($search) {
+        $booksQuery->where(function($query) use ($search) {
+            $query->where('Bookname', 'like', "%{$search}%")
+                  ->orWhere('Author', 'like', "%{$search}%")
+                  ->orWhere('Category', 'like', "%{$search}%");
+        });
+    }
+    
+    $books = $booksQuery->orderBy('Bookname')->get();
+
+    // Lấy orders của student
+    $orders = OrderBook::where('StudentID', Session::get('student_id'))
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return view('student.dashboard', compact('books', 'orders', 'search'));
+}
 
     // Tìm kiếm sách
     public function searchBooks(Request $request)

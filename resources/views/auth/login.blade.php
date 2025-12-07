@@ -75,11 +75,8 @@
                 
                 <div class="mt-4 text-center text-muted small">
                     <p class="mb-2">
-                        <strong>Test Accounts:</strong>
                     </p>
                     <div class="bg-light p-2 rounded">
-                        <p class="mb-1"><strong>Admin:</strong> admin / admin</p>
-                        <p class="mb-0"><strong>Student:</strong> Register new account</p>
                     </div>
                 </div>
             </div>

@@ -143,7 +143,7 @@
     <!-- Footer -->
     <footer class="mt-5 py-3 bg-light border-top">
         <div class="container text-center text-muted">
-            <small>Library Management System &copy; {{ date('Y') }} - Student Project</small>
+            <small>Library Management System &copy; {{ date('Y') }} - Project by trysnguyen</small>
         </div>
     </footer>
 

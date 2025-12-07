@@ -5,7 +5,9 @@
     <div class="col-md-6">
         <h3>Available Books</h3>
         <div class="mb-3">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search book/author/category">
+            <input type="text" id="searchInput" class="form-control" 
+                   placeholder="Search book/author/category"
+                   value="{{ request('search') }}">
             <button id="searchBtn" class="btn btn-primary mt-2">Search</button>
             <button id="resetBtn" class="btn btn-secondary mt-2">Reset</button>
         </div>
@@ -22,17 +24,29 @@
                 </thead>
                 <tbody id="booksTable">
                     @foreach($books as $index => $book)
+                    <?php
+                    $hasOrdered = \App\Models\OrderBook::where('StudentID', session('student_id'))
+                        ->where('Bookname', $book->Bookname)
+                        ->whereIn('Status', ['Pending', 'Accept'])
+                        ->exists();
+                    ?>
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $book->Bookname }}</td>
                         <td>{{ $book->Author }}</td>
                         <td>{{ $book->Category }}</td>
                         <td>
+                            @if(!$hasOrdered && $book->Quantity > 0)
                             <form method="POST" action="{{ route('student.order') }}">
                                 @csrf
                                 <input type="hidden" name="book_id" value="{{ $book->BookID }}">
                                 <button type="submit" class="btn btn-success btn-sm">Order</button>
                             </form>
+                            @elseif($hasOrdered)
+                            <button class="btn btn-secondary btn-sm" disabled>Ordered</button>
+                            @else
+                            <button class="btn btn-danger btn-sm" disabled>Unavailable</button>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
@@ -80,38 +94,39 @@
 
 @section('scripts')
 <script>
+// Tìm kiếm đơn giản
 document.getElementById('searchBtn').addEventListener('click', function() {
     const searchText = document.getElementById('searchInput').value;
     
-    fetch("{{ route('student.search') }}?search=" + encodeURIComponent(searchText))
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.getElementById('booksTable');
-            tableBody.innerHTML = '';
-            
-            data.forEach((book, index) => {
-                const row = `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${book.Bookname}</td>
-                        <td>${book.Author}</td>
-                        <td>${book.Category}</td>
-                        <td>
-                            <form method="POST" action="{{ route('student.order') }}">
-                                @csrf
-                                <input type="hidden" name="book_id" value="${book.BookID}">
-                                <button type="submit" class="btn btn-success btn-sm">Order</button>
-                            </form>
-                        </td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-        });
+    if (searchText.trim() === '') {
+        // Nếu search rỗng, reload trang
+        window.location.href = "{{ route('student.dashboard') }}";
+        return;
+    }
+    
+    // Chuyển đến trang với search parameter
+    window.location.href = "{{ route('student.dashboard') }}?search=" + encodeURIComponent(searchText);
 });
 
+// Reset
 document.getElementById('resetBtn').addEventListener('click', function() {
-    location.reload();
+    window.location.href = "{{ route('student.dashboard') }}";
+});
+
+// Tìm kiếm khi nhấn Enter
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('searchBtn').click();
+    }
+});
+
+// Nếu URL có search parameter, điền vào input
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    if (searchParam) {
+        document.getElementById('searchInput').value = decodeURIComponent(searchParam);
+    }
 });
 </script>
 @endsection
