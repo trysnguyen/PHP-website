@@ -62,6 +62,7 @@ Route::middleware(['auth.admin'])->group(function () {
     Route::post('/admin/update-order-status', [AdminController::class, 'updateOrderStatus'])->name('admin.update.order.status');
     Route::post('/admin/mark-returned', [AdminController::class, 'markAsReturned'])->name('admin.mark.returned');
     Route::get('/admin/statistics', [AdminController::class, 'statistics'])->name('admin.statistics');
+
 });
 
 // ============================================
