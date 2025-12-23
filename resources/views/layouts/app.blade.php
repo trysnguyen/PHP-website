@@ -4,140 +4,187 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Library Management System - Student Project">
-    <meta name="author" content="Nguyen Dinh Bao Tri">
     
     <title>@yield('title', 'Library Management System')</title>
     
-    <!-- Bootstrap 5.3 CSS -->
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    
     <!-- Custom CSS -->
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --light-color: #f8f9fa;
-            --dark-color: #2c3e50;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-        }
-        
+        /* ========== CẤU HÌNH CHUNG ========== */
         * {
-            font-family: 'Roboto', sans-serif;
-        }
-        
-        h1, h2, h3, h4, h5, h6, .navbar-brand {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+            padding-top: 80px; /* KHOẢNG CÁCH QUAN TRỌNG: Giữ chỗ cho fixed header */
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-            background-color: #f5f7fa;
-            color: #333;
         }
         
-        .main-content {
-            flex: 1;
-            padding-top: 80px; /* Space for fixed header */
-            padding-bottom: 40px;
-        }
-        
-        /* ========== HEADER STYLES ========== */
+        /* ========== HEADER VỚI KHOẢNG CÁCH ========== */
         .main-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1a2530 100%);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             position: fixed;
             top: 0;
-            width: 100%;
-            z-index: 1030;
-            padding: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 80px; /* Chiều cao cố định */
         }
         
-        .navbar-brand {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: white !important;
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 100%;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 15px 0;
+            justify-content: space-between;
         }
         
-        .navbar-brand .brand-icon {
-            color: var(--secondary-color);
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            color: #60a5fa;
             font-size: 2rem;
-            animation: pulse 2s infinite;
+            transition: transform 0.3s ease;
         }
         
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .logo:hover .logo-icon {
+            transform: rotate(15deg);
+        }
+        
+        .logo-text {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Navigation */
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            height: 100%;
+        }
+        
+        .nav-item {
+            list-style: none;
         }
         
         .nav-link {
-            color: rgba(255, 255, 255, 0.85) !important;
-            font-weight: 500;
-            padding: 12px 20px !important;
-            margin: 0 5px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            height: 48px;
         }
         
-        .nav-link:hover, .nav-link.active {
-            color: white !important;
-            background-color: rgba(255, 255, 255, 0.1);
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
             transform: translateY(-2px);
         }
         
-        .nav-link i {
-            font-size: 1.1rem;
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
+        /* User Info */
         .user-info {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.9rem;
-            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            margin-left: 15px;
+            margin-left: 10px;
+            color: white;
+            font-size: 0.9rem;
         }
         
+        /* Logout Button */
         .logout-btn {
-            background: rgba(231, 76, 60, 0.9);
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
             border: none;
-            padding: 8px 20px;
-            border-radius: 6px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 500;
+            margin-left: 10px;
         }
         
         .logout-btn:hover {
-            background: var(--danger-color);
+            background: #dc2626;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
         }
         
-        /* ========== FOOTER STYLES ========== */
+        /* ========== MAIN CONTENT - KHOẢNG CÁCH QUAN TRỌNG ========== */
+        .main-content {
+            flex: 1;
+            padding: 40px 0; /* Khoảng cách trên dưới nội dung */
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        
+        /* Container spacing */
+        .content-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* ========== FOOTER ========== */
         .main-footer {
-            background: linear-gradient(135deg, var(--dark-color) 0%, #1a2530 100%);
-            color: rgba(255, 255, 255, 0.85);
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #cbd5e1;
             padding: 40px 0 20px;
-            margin-top: auto;
-            border-top: 4px solid var(--secondary-color);
+            margin-top: 60px; /* Khoảng cách từ nội dung đến footer */
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
         
         .footer-content {
@@ -145,7 +192,9 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .footer-logo {
@@ -155,88 +204,97 @@
         }
         
         .footer-logo i {
-            color: var(--secondary-color);
+            color: #60a5fa;
             font-size: 2.5rem;
         }
         
         .footer-logo h4 {
             color: white;
             margin: 0;
-            font-weight: 600;
-        }
-        
-        .footer-links {
-            display: flex;
-            gap: 30px;
-        }
-        
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .footer-links a:hover {
-            color: var(--secondary-color);
         }
         
         .footer-bottom {
             text-align: center;
             padding-top: 20px;
-            margin-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
+            color: #94a3b8;
             font-size: 0.9rem;
-        }
-        
-        .footer-bottom a {
-            color: var(--secondary-color);
-            text-decoration: none;
-        }
-        
-        .footer-bottom a:hover {
-            text-decoration: underline;
         }
         
         /* ========== RESPONSIVE ========== */
         @media (max-width: 992px) {
-            .main-content {
+            body {
                 padding-top: 70px;
             }
             
-            .nav-link {
-                padding: 10px 15px !important;
-                margin: 5px 0;
+            .main-header {
+                height: 70px;
             }
             
-            .user-info {
-                margin: 10px 0;
-                text-align: center;
+            .nav-menu {
+                gap: 3px;
+            }
+            
+            .nav-link {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .main-content {
+                padding: 30px 15px;
+            }
+            
+            .content-container {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-header {
+                height: auto;
+                padding: 10px 0;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+                padding: 10px 15px;
+            }
+            
+            .nav-menu {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .user-info, .logout-btn {
+                margin: 5px;
+            }
+            
+            body {
+                padding-top: 120px; /* Tăng khoảng cách cho header cao hơn */
+            }
+            
+            .main-content {
+                padding-top: 20px;
             }
             
             .footer-content {
                 flex-direction: column;
                 text-align: center;
-                gap: 30px;
-            }
-            
-            .footer-links {
-                flex-direction: column;
-                gap: 15px;
+                gap: 20px;
             }
         }
         
-        @media (max-width: 768px) {
-            .navbar-brand {
-                font-size: 1.5rem;
-            }
-            
-            .navbar-brand .brand-icon {
-                font-size: 1.8rem;
-            }
+        /* ========== ALERTS ========== */
+        .alert-container {
+            margin-bottom: 25px;
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
         
         /* ========== CARD STYLES ========== */
@@ -244,187 +302,136 @@
             border: none;
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
             margin-bottom: 20px;
+            transition: transform 0.3s ease;
+            background: white;
         }
         
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
         
         .card-header {
-            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             color: white;
             border-radius: 12px 12px 0 0 !important;
-            padding: 15px 20px;
+            padding: 20px;
             font-weight: 600;
         }
         
-        /* ========== ALERT STYLES ========== */
-        .alert {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            border-left: 4px solid var(--success-color);
-        }
-        
-        .alert-danger {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            border-left: 4px solid var(--danger-color);
-        }
-        
-        /* ========== BUTTON STYLES ========== */
-        .btn {
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, var(--success-color) 0%, #219653 100%);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, var(--warning-color) 0%, #d68910 100%);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+        /* ========== TABLE STYLES ========== */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
         }
     </style>
     
-    @stack('styles') <!-- For additional page-specific styles -->
+    @stack('styles')
 </head>
 <body>
     <!-- ========== HEADER ========== -->
     <header class="main-header">
-        <nav class="navbar navbar-expand-lg">
-            <div class="container">
-                <!-- Logo -->
-                <a class="navbar-brand" href="/">
-                    <i class="bi bi-book-half brand-icon"></i>
-                    <span>LibraSys</span>
-                </a>
-                
-                <!-- Mobile Toggle -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <!-- Navigation Menu -->
-                <div class="collapse navbar-collapse" id="mainNavbar">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        @if(Session::get('admin_logged_in'))
-                            <!-- ADMIN MENU -->
-                            <li class="nav-item">
-                                <a class="nav-link @if(Request::is('admin/dashboard')) active @endif" 
-                                   href="{{ route('admin.dashboard') }}">
-                                    <i class="bi bi-speedometer2"></i> Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @if(Request::is('admin/orders')) active @endif" 
-                                   href="{{ route('admin.orders') }}">
-                                    <i class="bi bi-list-check"></i> Orders
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @if(Request::is('admin/statistics')) active @endif" 
-                                   href="{{ route('admin.statistics') }}">
-                                    <i class="bi bi-graph-up"></i> Statistics
-                                </a>
-                            </li>
-                            
-                            <li class="nav-item d-flex align-items-center">
-                                <div class="user-info">
-                                    <i class="bi bi-person-circle"></i>
-                                    {{ Session::get('username') }} (Admin)
-                                </div>
-                            </li>
-                            
-                            <li class="nav-item">
-                                <form action="{{ route('logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn logout-btn">
-                                        <i class="bi bi-box-arrow-right"></i> Logout
-                                    </button>
-                                </form>
-                            </li>
-                            
-                        @elseif(Session::get('student_logged_in'))
-                            <!-- STUDENT MENU -->
-                            <li class="nav-item">
-                                <a class="nav-link @if(Request::is('student/dashboard')) active @endif" 
-                                   href="{{ route('student.dashboard') }}">
-                                    <i class="bi bi-house-door"></i> Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @if(Request::is('student/history')) active @endif" 
-                                   href="{{ route('student.history') }}">
-                                    <i class="bi bi-clock-history"></i> History
-                                </a>
-                            </li>
-                            
-                            <li class="nav-item d-flex align-items-center">
-                                <div class="user-info">
-                                    <i class="bi bi-person-circle"></i>
-                                    {{ Session::get('username') }} (Student)
-                                </div>
-                            </li>
-                            
-                            <li class="nav-item">
-                                <form action="{{ route('logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn logout-btn">
-                                        <i class="bi bi-box-arrow-right"></i> Logout
-                                    </button>
-                                </form>
-                            </li>
-                            
-                        @else
-                            <!-- PUBLIC MENU -->
-                            <li class="nav-item">
-                                <a class="nav-link @if(Request::is('login')) active @endif" 
-                                   href="{{ route('login') }}">
-                                    <i class="bi bi-box-arrow-in-right"></i> Login
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @if(Request::is('register')) active @endif" 
-                                   href="{{ route('register') }}">
-                                    <i class="bi bi-person-plus"></i> Register
-                                </a>
-                            </li>
-                        @endif
-                    </ul>
-                </div>
-            </div>
-        </nav>
+        <div class="header-container">
+            <!-- Logo -->
+            <a href="/" class="logo">
+                <i class="bi bi-book-half logo-icon"></i>
+                <span class="logo-text">Library System</span>
+            </a>
+            
+            <!-- Navigation -->
+            <ul class="nav-menu">
+                @if(Session::get('admin_logged_in'))
+                    <!-- ADMIN -->
+                    <li class="nav-item">
+                        <a class="nav-link @if(Request::is('admin/dashboard')) active @endif" 
+                           href="{{ route('admin.dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @if(Request::is('admin/orders')) active @endif" 
+                           href="{{ route('admin.orders') }}">
+                            <i class="bi bi-list-check"></i> Orders
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @if(Request::is('admin/statistics')) active @endif" 
+                           href="{{ route('admin.statistics') }}">
+                            <i class="bi bi-graph-up"></i> Statistics
+                        </a>
+                    </li>
+                    
+                    <div class="user-info">
+                        <i class="bi bi-person-circle"></i>
+                        <span>{{ Session::get('username') }}</span>
+                    </div>
+                    
+                    <li class="nav-item">
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="logout-btn">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                    
+                @elseif(Session::get('student_logged_in'))
+                    <!-- STUDENT -->
+                    <li class="nav-item">
+                        <a class="nav-link @if(Request::is('student/dashboard')) active @endif" 
+                           href="{{ route('student.dashboard') }}">
+                            <i class="bi bi-house-door"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @if(Request::is('student/history')) active @endif" 
+                           href="{{ route('student.history') }}">
+                            <i class="bi bi-clock-history"></i> History
+                        </a>
+                    </li>
+                    
+                    <div class="user-info">
+                        <i class="bi bi-person-circle"></i>
+                        <span>{{ Session::get('username') }}</span>
+                    </div>
+                    
+                    <li class="nav-item">
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="logout-btn">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                    
+                @else
+                    <!-- PUBLIC -->
+                    <li class="nav-item">
+                        <a class="nav-link @if(Request::is('login')) active @endif" 
+                           href="{{ route('login') }}">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @if(Request::is('register')) active @endif" 
+                           href="{{ route('register') }}">
+                            <i class="bi bi-person-plus"></i> Register
+                        </a>
+                    </li>
+                @endif
+            </ul>
+        </div>
     </header>
 
     <!-- ========== MAIN CONTENT ========== -->
     <main class="main-content">
-        <div class="container">
-            <!-- Flash Messages -->
+        <!-- Flash Messages -->
+        <div class="alert-container">
             @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <div class="d-flex align-items-center">
                     <i class="bi bi-check-circle-fill me-3 fs-4"></i>
                     <div>
@@ -437,7 +444,7 @@
             @endif
             
             @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <div class="d-flex align-items-center">
                     <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
                     <div>
@@ -448,78 +455,53 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
             @endif
-            
-            <!-- Page Content -->
-            @yield('content')
         </div>
+        
+        <!-- Page Content -->
+        @yield('content')
     </main>
 
     <!-- ========== FOOTER ========== -->
     <footer class="main-footer">
-        <div class="container">
+        <div class="footer-container">
             <div class="footer-content">
-                <!-- Logo & Info -->
                 <div class="footer-logo">
                     <i class="bi bi-book-half"></i>
                     <div>
                         <h4>Library Management System</h4>
-                        <p class="mb-0">Efficient book tracking & borrowing system</p>
+                        <p>Efficient book tracking system</p>
                     </div>
                 </div>
                 
-                <!-- Quick Links -->
-                <div class="footer-links">
-                    <a href="{{ route('login') }}">
-                        <i class="bi bi-box-arrow-in-right"></i> Login
-                    </a>
-                    @if(Session::get('admin_logged_in'))
-                    <a href="{{ route('admin.dashboard') }}">
-                        <i class="bi bi-speedometer2"></i> Admin Dashboard
-                    </a>
-                    @elseif(Session::get('student_logged_in'))
-                    <a href="{{ route('student.dashboard') }}">
-                        <i class="bi bi-house-door"></i> Student Dashboard
-                    </a>
-                    @endif
-                    <a href="{{ route('register') }}">
-                        <i class="bi bi-person-plus"></i> Register
-                    </a>
+                <div class="footer-info">
+                    <p><i class="bi bi-code-slash"></i> Built with Laravel & Bootstrap</p>
+                    <p><i class="bi bi-person-workspace"></i> Student Project</p>
                 </div>
             </div>
             
-            <!-- Copyright -->
             <div class="footer-bottom">
                 <p class="mb-0">
-                    &copy; 2025 <strong>Library Management System</strong> 
-                    | Student Project by <strong>Nguyen Dinh Bao Tri</strong>
-                    | <i class="bi bi-code-slash"></i> Built with Laravel & Bootstrap
-                </p>
-                <p class="mt-2 mb-0">
-                    <small>
-                        <i class="bi bi-envelope"></i> Contact: trindb.24ai@vku.udn.vn |
-                        <i class="bi bi-github"></i> GitHub: github.com/trysnguyen
-                    </small>
+                    &copy; 2025 <strong>Library Management System</strong> | 
+                    Student Project by <strong>Nguyen Dinh Bao Tri</strong>
                 </p>
             </div>
         </div>
     </footer>
 
     <!-- ========== SCRIPTS ========== -->
-    <!-- Bootstrap 5.3 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Custom Scripts -->
     <script>
-        // Auto-hide alerts after 5 seconds
+        // Auto-hide alerts
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+        
+        // Highlight active menu
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                document.querySelectorAll('.alert').forEach(alert => {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                });
-            }, 5000);
-            
-            // Add active class to current page in navbar
             const currentPath = window.location.pathname;
             document.querySelectorAll('.nav-link').forEach(link => {
                 if (link.getAttribute('href') === currentPath) {
@@ -527,23 +509,8 @@
                 }
             });
         });
-        
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
     </script>
     
-    <!-- Page-specific scripts -->
     @yield('scripts')
     @stack('scripts')
 </body>
